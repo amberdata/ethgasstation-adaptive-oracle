@@ -12,10 +12,13 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from egs_ref import *
 import modelparams
+import datetime
+# web3 = Web3(HTTPProvider('http://localhost:8545'))
+web3 = Web3(HTTPProvider('http://34.207.82.107:8545'))
 
-web3 = Web3(HTTPProvider('http://localhost:8545'))
-engine = create_engine(
-    'mysql+mysqlconnector://ethgas:station@127.0.0.1:3306/tx', echo=False)
+# engine = create_engine(
+#     'mysql+mysqlconnector://ethgas:station@127.0.0.1:3306/tx', echo=False)
+engine = create_engine('postgresql://pwang:%3EMwoYREUZIE%25z%40%21%5B@127.0.0.1/ethereum')
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -60,6 +63,13 @@ def write_to_sql(alltx, analyzed_block, block_sumdf, mined_blockdf, block):
     analyzed_block.to_sql(con=engine, name='txpool_current', index=False, if_exists='replace')
     block_sumdf.to_sql(con=engine, name='blockdata2', if_exists='append', index=False)
 
+def write_to_sql_gprecs(gprecs):
+    gprecs['safeLow'] = gprecs['safeLow'] / 10
+    gprecs['average'] = gprecs['average'] / 10
+    gprecs['fast'] = gprecs['fast'] / 10
+    gprecs['fastest'] = gprecs['fastest'] / 10
+    gprecs['timestamp'] = datetime.datetime.utcnow()
+    pd.DataFrame.from_dict([gprecs]).to_sql(con=engine, name='ethgas2', if_exists='append', index=False)
 
 def write_to_json(gprecs, txpool_by_gp, prediction_table, analyzed_block,submitted_hourago=None):
     """write json data"""
@@ -511,9 +521,11 @@ def master_control():
             if not submitted_hourago.empty:
                 submitted_hourago.reset_index(drop=False, inplace=True)
                 submitted_hourago = submitted_hourago.sort_values('round_gp_10gwei')
-            write_to_json(gprecs, txpool_by_gp, predictiondf, analyzed_block, submitted_hourago)
+#             write_to_json(gprecs, txpool_by_gp, predictiondf, analyzed_block, submitted_hourago)
+            print('gprecs = '+str(gprecs))
             write_to_sql(alltx, analyzed_block, block_sumdf, mined_blockdf, block)
-
+            write_to_sql_gprecs(gprecs)
+            
             #keep from getting too large
             (blockdata, alltx, txpool) = prune_data(blockdata, alltx, txpool, block)
             return True
@@ -530,6 +542,8 @@ def master_control():
             new_tx_list = web3.eth.getFilterChanges(tx_filter.filter_id)
         block = web3.eth.blockNumber
         timestamp = time.time()
+        print('timer.process_block = '+str(timer.process_block)) 
+        print('block = '+str(block)) 
         if (timer.process_block > (block - 5)):
             for new_tx in new_tx_list:    
                 try:        

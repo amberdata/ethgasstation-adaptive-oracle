@@ -3,11 +3,26 @@ import numpy as np
 import json
 import urllib
 import time
-from sqlalchemy import create_engine, Column, Integer, String, DECIMAL, BigInteger
+import datetime
+from sqlalchemy import create_engine, Column, Integer, String, DECIMAL, BigInteger, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
-
+class Eth_Gas_Api(Base):
+    __tablename__ = 'ethgas2'
+    id = Column(Integer, primary_key=True)
+    safeLow = Column(DECIMAL(10, 4))
+    safeLowWait = Column(DECIMAL(10, 4))
+    average = Column(DECIMAL(10, 4))
+    avgWait = Column(DECIMAL(10, 4))
+    fast = Column(DECIMAL(10, 4))
+    fastWait = Column(DECIMAL(10, 4))
+    fastest = Column(DECIMAL(10, 4))
+    fastestWait = Column(DECIMAL(10, 4))
+    block_time = Column(DECIMAL(10, 4))
+    blockNum = Column(Integer)
+    speed = Column(DECIMAL(10, 4))
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
 class Mined_Sql(Base):
     """mysql schema for minedtransaction"""
     __tablename__ = 'minedtx2'
@@ -15,14 +30,15 @@ class Mined_Sql(Base):
     index = Column(String(75))
     block_mined = Column(Integer)
     block_posted = Column(Integer)
-    expectedTime = Column(DECIMAL(5, 2))
-    expectedWait = Column(DECIMAL(5, 2))
-    mined_probability = Column(DECIMAL(5, 3))
+    expectedTime = Column(DECIMAL(10, 4))
+    expectedWait = Column(DECIMAL(10, 4))
+    mined_probability = Column(DECIMAL(10, 6))
     highgas2 = Column(Integer)
     from_address = Column(String(60))
     gas_offered = Column(Integer)
     gas_price = Column(BigInteger)
-    gp10th = Column(DECIMAL(5,2))
+    gp10th = Column(DECIMAL(10,4))
+    s1hago = Column(Integer)
     s5mago = Column(Integer)
     hashpower_accepting = Column(Integer)
     hgXhpa = Column(Integer)
@@ -32,7 +48,7 @@ class Mined_Sql(Base):
     ico = Column(Integer)
     dump = Column(Integer)
     high_gas_offered = Column(Integer)
-    pct_limit = Column(DECIMAL(5, 4))
+    pct_limit = Column(DECIMAL(10, 8))
     removed_block = Column(Integer)
     round_gp_10gwei = Column(Integer)
     time_posted = Column(Integer)
@@ -51,13 +67,14 @@ class Tx_Sql(Base):
     index = Column(String(75))
     block_mined = Column(Integer)
     block_posted = Column(Integer)
-    expectedTime = Column(DECIMAL(5, 2))
-    expectedWait = Column(DECIMAL(5, 2))
-    mined_probability = Column(DECIMAL(5, 3))
+    expectedTime = Column(DECIMAL(10, 4))
+    expectedWait = Column(DECIMAL(10, 4))
+    mined_probability = Column(DECIMAL(10, 6))
     from_address = Column(String(60))
     gas_offered = Column(Integer)
     gas_price = Column(BigInteger)
-    gp10th = Column(DECIMAL(5,2))
+    gp10th = Column(DECIMAL(10,4))
+    s1hago = Column(Integer)
     s5mago = Column(Integer)
     highgas2 = Column(Integer)
     hashpower_accepting = Column(Integer)
@@ -68,7 +85,7 @@ class Tx_Sql(Base):
     ico = Column(Integer)
     dump = Column(Integer)
     high_gas_offered = Column(Integer)
-    pct_limit = Column(DECIMAL(5, 4))
+    pct_limit = Column(DECIMAL(10, 8))
     removed_block = Column(Integer)
     round_gp_10gwei = Column(Integer)
     time_posted = Column(Integer)
