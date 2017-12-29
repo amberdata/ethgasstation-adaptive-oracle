@@ -19,7 +19,7 @@ web3 = Web3(HTTPProvider('http://34.207.82.107:8545'))
 # engine = create_engine(
 #     'mysql+mysqlconnector://ethgas:station@127.0.0.1:3306/tx', echo=False)
 engine = create_engine('postgresql://pwang:%3EMwoYREUZIE%25z%40%21%5B@127.0.0.1/ethereum')
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
