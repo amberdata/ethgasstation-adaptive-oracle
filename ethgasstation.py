@@ -13,12 +13,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from egs_ref import *
 import modelparams
 import datetime
+from urllib.parse import quote_plus as urlquote
+
 # web3 = Web3(HTTPProvider('http://localhost:8545'))
-web3 = Web3(HTTPProvider('http://34.207.82.107:8545'))
+web3 = Web3(HTTPProvider('http://' + os.environ['WEB3_HOST'] + ':' + os.environ['WEB3_PORT']))
 
 # engine = create_engine(
 #     'mysql+mysqlconnector://ethgas:station@127.0.0.1:3306/tx', echo=False)
-engine = create_engine('postgresql://pwang:%3EMwoYREUZIE%25z%40%21%5B@127.0.0.1/ethereum')
+engine = create_engine('postgresql://' + os.environ['DATABASE_USERNAME'] + ':' + urlquote(os.environ['DATABASE_PASSWORD']) + '@' + os.environ['DATABASE_HOSTNAME'] + ':' + os.environ['DATABASE_PORT'] + '/' + os.environ['DATABASE_NAME'], echo=False)
 # Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -542,8 +544,8 @@ def master_control():
             new_tx_list = web3.eth.getFilterChanges(tx_filter.filter_id)
         block = web3.eth.blockNumber
         timestamp = time.time()
-        print('timer.process_block = '+str(timer.process_block)) 
-        print('block = '+str(block)) 
+        #print('timer.process_block = '+str(timer.process_block)) 
+        #print('block = '+str(block)) 
         if (timer.process_block > (block - 5)):
             for new_tx in new_tx_list:    
                 try:        

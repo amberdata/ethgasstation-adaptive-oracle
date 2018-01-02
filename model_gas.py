@@ -7,15 +7,15 @@ import statsmodels.api as sm
 import math
 import sys
 import os, subprocess, re
-import urllib,json
+import json
 from sqlalchemy import create_engine 
 from patsy import dmatrices
+from urllib.parse import quote_plus as urlquote
 
 # cnx = mysql.connector.connect(user='ethgas', password='station', host='127.0.0.1', database='tx')
 # cursor = cnx.cursor()
-# engine = create_engine(
 #     'mysql+mysqlconnector://ethgas:station@127.0.0.1:3306/tx', echo=False)
-engine = create_engine('postgresql://pwang:%3EMwoYREUZIE%25z%40%21%5B@127.0.0.1/ethereum', echo=False)
+engine = create_engine('postgresql://' + os.environ['DATABASE_USERNAME'] + ':' + urlquote(os.environ['DATABASE_PASSWORD']) + '@' + os.environ['DATABASE_HOSTNAME'] + ':' + os.environ['DATABASE_PORT'] + '/' + os.environ['DATABASE_NAME'], echo=False)
 # query = ("SELECT * FROM minedtx2")
 # cursor.execute(query)
 # head = cursor.column_names
