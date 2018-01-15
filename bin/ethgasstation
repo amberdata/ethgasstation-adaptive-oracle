@@ -1,0 +1,258 @@
+#!/bin/sh
+#
+#
+# chkconfig: - 20 80
+#
+#
+### BEGIN INIT INFO
+# provides: eth_gas_station
+# Required-Start:    $network $remote_fs $local_fs
+# Required-Stop:     $network $remote_fs $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 2 6
+# Short-Description: start and stop eth_gas_station
+# Description: start and stop eth_gas_station
+### END INIT INFO
+
+###############
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+APP_NAME="ethgasstation"
+HOME_DIR="/home/ec2-user"
+
+USER="root"
+GROUP="$USER"
+
+APP_SERVER="python3"
+APP_NAME="ethgasstation"
+KWARGS=""
+APP_EXEC=$(which $APP_SERVER)
+APP_STATUS="pgrep -f $APP_NAME\.py\$"
+STARTUP_TIMEOUT=5
+
+APP_DIR="$HOME_DIR/ethgasstation-adaptive-oracle"
+PID_DIR="/var/run"
+PID_FILE="$PID_DIR/$APP_NAME.pid"
+LOG_DIR="/var/log"
+LOG_FILE="$LOG_DIR/$APP_NAME.log"
+
+# Source environment config
+. $APP_DIR/etc/$APP_NAME.config || exit 1
+
+ [ -z "${DB_HOSTNAME}"   ] && declare DB_HOSTNAME="127.0.0.1"
+ [ -z "${DB_PORT}"       ] && declare DB_PORT="5432"
+ [ -z "${DB_NAME}"       ] && declare DB_NAME="ethereum"
+ [ -z "${DB_USERNAME}"   ] && declare DB_USERNAME="admin"
+ [ -z "${DB_PASSWORD}"   ] && declare DB_PASSWORD="admin"
+
+ [ -z "${WEB3_HOST}"     ] && declare WEB3_HOST="127.0.0.1"
+ [ -z "${WEB3_PORT}"     ] && declare WEB3_PORT="8545"
+
+ USAGE="Usage: $0 {start|stop|kill|restart|status} [--force]"
+ FORCE_OP=true
+
+pid_file_exists() {
+    [ -f "$PID_FILE" ]
+}
+
+get_pid() {
+  if pid_file_exists
+  then
+    echo "$(cat "$PID_FILE")"
+  else
+    echo $($APP_STATUS)
+  fi
+}
+
+is_running() {
+    PID="$(get_pid)"
+    [ -d /proc/$PID ]
+}
+
+start_it() {
+    mkdir -p "$PID_DIR"
+    chown $USER:$GROUP "$PID_DIR"
+    mkdir -p "$LOG_DIR"
+    chown $USER:$GROUP "$LOG_DIR"
+
+    echo "Starting $APP_NAME ..."
+    START_CMD="cd $APP_DIR &&                \
+        DATABASE_HOSTNAME=\"${DB_HOSTNAME}\" \
+        DATABASE_PORT=\"${DB_PORT}\"         \
+        DATABASE_NAME=\"${DB_NAME}\"         \
+        DATABASE_USERNAME=\"${DB_USERNAME}\" \
+        DATABASE_PASSWORD=\"${DB_PASSWORD}\" \
+        WEB3_HOST=\"${WEB3_HOST}\"           \
+        WEB3_PORT=\"${WEB3_PORT}\"           \
+        nohup $APP_EXEC $APP_DIR/$APP_NAME.py"
+    daemon --user=$USER --pidfile=$PID_FILE "$START_CMD 1>>$LOG_FILE 2>&1 &"
+    n=0
+    until [ "$n" -ge "$STARTUP_TIMEOUT" ];
+    do
+       PID=$($APP_STATUS)
+       if [ ! -z "$PID" ]
+       then
+          break
+       fi
+       n=$((n+1))
+       sleep .5
+    done
+
+    if [ -z "$PID" ]
+    then
+      echo "Timed out attempting to start process"
+      exit 1
+    fi
+    echo $PID > $PID_FILE
+    echo "$APP_NAME started with pid $(get_pid)"
+}
+
+stop_process() {
+    PID=$(get_pid)
+
+    if pid_file_exists
+    then
+      echo "Killing process $PID_FILE"
+      killproc  -p "$PID_FILE"
+    fi
+
+    # shoot it in the head if still is_running
+    if is_running
+    then
+        pkill $APP_SERVER
+
+        PID=$(get_pid)
+        if [ ! -z "$PID" ]
+        then
+          /bin/kill -9 $PID
+        fi
+    fi
+}
+
+remove_pid_file() {
+    echo "Removing pid file"
+    rm -f "$PID_FILE"
+}
+
+start_app() {
+
+    if pid_file_exists
+    then
+        if is_running
+        then
+            PID=$(get_pid)
+            echo "$APP_NAME already running with pid $PID"
+            exit 1
+        else
+            echo "$APP_NAME stopped, but pid file exists"
+            if [ $FORCE_OP = true ]
+            then
+                echo "Forcing start anyways"
+                remove_pid_file
+                start_it
+            fi
+        fi
+    else
+        start_it
+    fi
+}
+
+stop_app() {
+
+    PID=$(get_pid)
+
+    if pid_file_exists || [ ! -z "$PID" ]
+    then
+        if is_running
+        then
+            echo "Stopping $APP_NAME ..."
+            stop_process
+            remove_pid_file
+            echo "$APP_NAME stopped"
+        else
+            echo "$APP_NAME already stopped, but pid file exists"
+            if [ $FORCE_OP = true ]
+            then
+                echo "Forcing stop anyways ..."
+                kill_app
+                echo "$APP_NAME stopped"
+            else
+                exit 1
+            fi
+        fi
+    else
+        echo "$APP_NAME already stopped, pid file does not exist"
+        exit 1
+    fi
+}
+
+status_app() {
+
+    PID=$(get_pid)
+
+    if pid_file_exists || [ ! -z "$PID" ]
+    then
+        if is_running
+        then
+            PID=$(get_pid)
+            echo "$APP_NAME running with pid $PID"
+        else
+            echo "$APP_NAME stopped, but pid file exists"
+        fi
+    else
+        echo "$APP_NAME stopped"
+    fi
+}
+
+kill_app() {
+
+  echo "Force killing $APP_NAME ..."
+  stop_process
+  remove_pid_file
+  echo "$APP_NAME killed"
+
+}
+
+case "$2" in
+    --force)
+        FORCE_OP=true
+    ;;
+
+    "")
+    ;;
+
+    *)
+        echo $USAGE
+        exit 1
+    ;;
+esac
+
+case "$1" in
+    start)
+        start_app
+    ;;
+
+    stop)
+        stop_app
+    ;;
+
+    kill)
+        kill_app
+    ;;
+
+    restart)
+        stop_app
+        start_app
+    ;;
+
+    status)
+        status_app
+    ;;
+
+    *)
+        echo $USAGE
+        exit 1
+    ;;
+esac
