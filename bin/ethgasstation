@@ -26,10 +26,10 @@ USER="root"
 GROUP="$USER"
 
 APP_SERVER="python3"
-APP_NAME="ethgasstation.py"
+APP_NAME="ethgasstation"
 KWARGS=""
-APP_STATUS="pgrep -f $APP_NAME"
 APP_EXEC=$(which $APP_SERVER)
+APP_STATUS="pgrep -f $APP_NAME\.py\$"
 STARTUP_TIMEOUT=5
 
 APP_DIR="$HOME_DIR/ethgasstation-adaptive-oracle"
@@ -47,12 +47,12 @@ FORCE_OP=true
 
 [ -z "${DB_HOSTNAME}"   ] && declare DB_HOSTNAME="127.0.0.1"
 [ -z "${DB_PORT}"       ] && declare DB_PORT="5432"
-[ -z "${DB_DATABASE}"   ] && declare DB_DATABASE="ethereum"
+[ -z "${DB_NAME}"   ] && declare DB_DNAME="ethereum"
 [ -z "${DB_USERNAME}"   ] && declare DB_USERNAME="admin"
 [ -z "${DB_PASSWORD}"   ] && declare DB_PASSWORD="admin"
 
-[ -z "${WEB3_RPC_HOST}" ] && declare WEB3_RPC_HOST="127.0.0.1"
-[ -z "${WEB3_RPC_PORT}" ] && declare WEB3_RPC_PORT="8545"
+[ -z "${WEB3_HOST}" ] && declare WEB3_HOST="127.0.0.1"
+[ -z "${WEB3_PORT}" ] && declare WEB3_PORT="8545"
 
 pid_file_exists() {
     [ -f "$PID_FILE" ]
@@ -82,12 +82,12 @@ start_it() {
     START_CMD="cd $APP_DIR && \
           DATABASE_HOSTNAME="${DB_HOSTNAME}" \
           DATABASE_PORT="${DB_PORT}"         \
-          DATABASE_DATABASE="${DB_DATABASE}" \
+          DATABASE_NAME="${DB_NAME}" \
           DATABASE_USERNAME="${DB_USERNAME}" \
           DATABASE_PASSWORD="${DB_PASSWORD}" \
-          WEB3_RPC_HOST="${WEB3_RPC_HOST}"   \
-          WEB3_RPC_PORT="${WEB3_RPC_PORT}"   \
-          $APP_EXEC $APP_NAME $KWARGS 1>>$LOG_FILE 2>&1 &" #| sudo -i -u $USER
+          WEB3_HOST="${WEB3_HOST}"   \
+          WEB3_PORT="${WEB3_PORT}"   \
+          nohup $APP_EXEC $APP_NAME.py $KWARGS 1>>$LOG_FILE 2>&1 &"
     daemon --user=$USER --pidfile=$PID_FILE "$START_CMD"
 
     n=0
@@ -117,7 +117,7 @@ stop_process() {
     if pid_file_exists
     then
       echo "Killing process $PID_FILE"
-      killproc -p "$PID_FILE"
+      killproc  -p "$PID_FILE"
     fi
 
     # shoot it in the head if still is_running
