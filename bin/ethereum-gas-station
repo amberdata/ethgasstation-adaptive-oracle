@@ -5,13 +5,13 @@
 #
 #
 ### BEGIN INIT INFO
-# provides: eth_gas_station
+# provides: ethereum-gas-station
 # Required-Start:    $network $remote_fs $local_fs
 # Required-Stop:     $network $remote_fs $local_fs
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 2 6
-# Short-Description: start and stop eth_gas_station
-# Description: start and stop eth_gas_station
+# Short-Description: start and stop ethereum-gas-station
+# Description: start and stop ethereum-gas-station
 ### END INIT INFO
 
 ###############
@@ -39,16 +39,16 @@ LOG_DIR="/var/log"
 LOG_FILE="$LOG_DIR/$APP_NAME.log"
 
 # Source environment config
-. $APP_DIR/etc/$APP_NAME.config || exit 1
+. $APP_DIR/etc/ethereum-gas-station.config || exit 1
 
- [ -z "${DB_HOSTNAME}"   ] && declare DB_HOSTNAME="127.0.0.1"
- [ -z "${DB_PORT}"       ] && declare DB_PORT="5432"
- [ -z "${DB_NAME}"       ] && declare DB_NAME="ethereum"
- [ -z "${DB_USERNAME}"   ] && declare DB_USERNAME="admin"
- [ -z "${DB_PASSWORD}"   ] && declare DB_PASSWORD="admin"
+ [ -z "${DB_HOSTNAME}"       ] && declare DB_HOSTNAME="127.0.0.1"
+ [ -z "${DB_PORT}"           ] && declare DB_PORT="5432"
+ [ -z "${DB_DATABASE}"       ] && declare DB_DATABASE="ethereum"
+ [ -z "${DB_USERNAME}"       ] && declare DB_USERNAME="admin"
+ [ -z "${DB_PASSWORD}"       ] && declare DB_PASSWORD="admin"
 
- [ -z "${WEB3_HOST}"     ] && declare WEB3_HOST="127.0.0.1"
- [ -z "${WEB3_PORT}"     ] && declare WEB3_PORT="8545"
+ [ -z "${WEB3_HOST}"         ] && declare WEB3_HOST="127.0.0.1"
+ [ -z "${WEB3_PORT}"         ] && declare WEB3_PORT="8545"
 
  USAGE="Usage: $0 {start|stop|kill|restart|status} [--force]"
  FORCE_OP=true
@@ -81,7 +81,7 @@ start_it() {
     START_CMD="cd $APP_DIR &&                \
         DATABASE_HOSTNAME=\"${DB_HOSTNAME}\" \
         DATABASE_PORT=\"${DB_PORT}\"         \
-        DATABASE_NAME=\"${DB_NAME}\"         \
+        DATABASE_NAME=\"${DB_DATABASE}\"     \
         DATABASE_USERNAME=\"${DB_USERNAME}\" \
         DATABASE_PASSWORD=\"${DB_PASSWORD}\" \
         WEB3_HOST=\"${WEB3_HOST}\"           \
