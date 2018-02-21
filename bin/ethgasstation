@@ -184,8 +184,6 @@ stop_app() {
                 echo "Forcing stop anyways ..."
                 kill_app
                 echo "$APP_NAME stopped"
-            else
-                exit 1
             fi
         fi
     else
