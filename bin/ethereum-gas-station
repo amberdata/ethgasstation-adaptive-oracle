@@ -19,7 +19,7 @@
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-APP_NAME="ethgasstation"
+APP_NAME="ethereum-gas-station"
 HOME_DIR="/home/ec2-user"
 
 USER="root"
@@ -38,7 +38,7 @@ LOG_DIR="/var/log"
 LOG_FILE="$LOG_DIR/$APP_NAME.log"
 
 # Source environment config - /etc/sysconfig is standard location
-ENV_CONFIG="/etc/sysconfig/ethereum-gas-station"
+ENV_CONFIG="/etc/sysconfig/$APP_NAME"
 if [ -f "$ENV_CONFIG" ]; then
     . $ENV_CONFIG || exit 1
 elif [ -f "$APP_DIR/etc/$APP_NAME.config" ]; then
@@ -91,7 +91,7 @@ start_it() {
         DATABASE_PASSWORD=\"${DB_PASSWORD}\" \
         WEB3_HOST=\"${WEB3_HOST}\"           \
         WEB3_PORT=\"${WEB3_PORT}\"           \
-        nohup $APP_EXEC $APP_DIR/$APP_NAME.py"
+        nohup $APP_EXEC $APP_DIR/ethgasstation.py"
     daemon --user=$USER --pidfile=$PID_FILE "$START_CMD 1>>$LOG_FILE 2>&1 &"
     n=0
     until [ "$n" -ge "$STARTUP_TIMEOUT" ];
