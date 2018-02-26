@@ -19,14 +19,13 @@
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-APP_NAME="ethgasstation"
+APP_NAME="ethereum-gas-station"
 HOME_DIR="/home/ec2-user"
 
 USER="root"
 GROUP="$USER"
 
 APP_SERVER="python3"
-APP_NAME="ethgasstation"
 KWARGS=""
 APP_EXEC=$(which $APP_SERVER)
 APP_STATUS="pgrep -f $APP_NAME\.py\$"
