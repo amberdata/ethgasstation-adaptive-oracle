@@ -19,7 +19,7 @@
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-APP_NAME="ethereum-gas-station"
+APP_NAME="ethgasstation"
 HOME_DIR="/home/ec2-user"
 
 USER="root"
@@ -38,7 +38,7 @@ LOG_DIR="/var/log"
 LOG_FILE="$LOG_DIR/$APP_NAME.log"
 
 # Source environment config - /etc/sysconfig is standard location
-ENV_CONFIG="/etc/sysconfig/$APP_NAME"
+ENV_CONFIG="/etc/sysconfig/ethereum-gas-station"
 if [ -f "$ENV_CONFIG" ]; then
     . $ENV_CONFIG || exit 1
 elif [ -f "$APP_DIR/etc/$APP_NAME.config" ]; then
