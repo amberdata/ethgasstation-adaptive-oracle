@@ -28,7 +28,7 @@ GROUP="$USER"
 APP_SERVER="python3"
 KWARGS=""
 APP_EXEC=$(which $APP_SERVER)
-APP_STATUS="pgrep -f $APP_NAME\.py\$"
+APP_STATUS="pgrep -f ethgasstation\.py\$"
 STARTUP_TIMEOUT=5
 
 APP_DIR="$HOME_DIR/ethgasstation-adaptive-oracle"
