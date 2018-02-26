@@ -38,8 +38,14 @@ PID_FILE="$PID_DIR/$APP_NAME.pid"
 LOG_DIR="/var/log"
 LOG_FILE="$LOG_DIR/$APP_NAME.log"
 
-# Source environment config
-. $APP_DIR/etc/ethereum-gas-station.config || exit 1
+# Source environment config - /etc/sysconfig is standard location
+ENV_CONFIG="/etc/sysconfig/$APP_NAME"
+if [ -f "$ENV_CONFIG" ]; then
+    . $ENV_CONFIG || exit 1
+elif [ -f "$APP_DIR/etc/$APP_NAME.config" ]; then
+    # TODO: Legacy config, remove in future
+    . $APP_DIR/etc/$APP_NAME.config || exit 1
+fi
 
  [ -z "${DB_HOSTNAME}"       ] && declare DB_HOSTNAME="127.0.0.1"
  [ -z "${DB_PORT}"           ] && declare DB_PORT="5432"
@@ -178,8 +184,6 @@ stop_app() {
                 echo "Forcing stop anyways ..."
                 kill_app
                 echo "$APP_NAME stopped"
-            else
-                exit 1
             fi
         fi
     else
